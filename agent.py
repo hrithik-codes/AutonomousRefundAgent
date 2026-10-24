@@ -17,7 +17,7 @@ except RuntimeError:
 
 from datetime import datetime, timezone
 from uuid import uuid4
-from uagents import Agent, Context, Protocol
+from uagents import Agent, Context, Protocol, Model
 from uagents_core.contrib.protocols.chat import (
     ChatMessage,
     ChatAcknowledgement,
@@ -43,6 +43,19 @@ agent = Agent(
     publish_agent_details=True,
     handle_messages_concurrently=True,
 )
+
+# HTTP Health Check Models & Endpoints (Returns 200 OK for cron-job keep-alive)
+class HealthStatus(Model):
+    status: str
+    agent: str
+
+@agent.on_rest_get("/", HealthStatus)
+async def root_handler(ctx: Context) -> HealthStatus:
+    return HealthStatus(status="online", agent=AGENT_NAME)
+
+@agent.on_rest_get("/health", HealthStatus)
+async def health_handler(ctx: Context) -> HealthStatus:
+    return HealthStatus(status="healthy", agent=AGENT_NAME)
 
 # 2. Attach the official Agent Chat Protocol (ACP)
 chat_proto = Protocol(spec=chat_protocol_spec)
