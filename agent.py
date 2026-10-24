@@ -6,6 +6,15 @@ import re
 os.environ["SSL_CERT_FILE"] = certifi.where()
 os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 
+import asyncio
+
+# Ensure an active event loop exists (fixes Python 3.14+ MainThread RuntimeError)
+try:
+    loop = asyncio.get_event_loop()
+except RuntimeError:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
 from datetime import datetime, timezone
 from uuid import uuid4
 from uagents import Agent, Context, Protocol
@@ -20,7 +29,7 @@ from uagents_core.contrib.protocols.chat import (
 from engine import process_dispute, get_order_details
 from llm_helper import generate_conversational_reply
 
-# 1. Initialize Local Agent with mailbox=True
+# 1. Initialize Agent with mailbox=True and explicit event loop
 AGENT_NAME = "fetchathon_agent"
 AGENT_SEED = "fetchathon3-hackathon-agent-seed-phrase-2026"
 PORT = 8000
@@ -30,6 +39,7 @@ agent = Agent(
     seed=AGENT_SEED,
     port=PORT,
     mailbox=True,
+    loop=loop,
     publish_agent_details=True,
     handle_messages_concurrently=True,
 )
