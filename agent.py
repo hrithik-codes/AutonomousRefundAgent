@@ -30,9 +30,9 @@ from engine import process_dispute, get_order_details
 from llm_helper import generate_conversational_reply
 
 # 1. Initialize Agent with mailbox=True and explicit event loop
-AGENT_NAME = "fetchathon_agent"
-AGENT_SEED = "fetchathon3-hackathon-agent-seed-phrase-2026"
-PORT = 8000
+AGENT_NAME = os.environ.get("AGENT_NAME", "fetchathon_agent")
+AGENT_SEED = os.environ.get("AGENT_SEED", "fetchathon3-hackathon-agent-seed-phrase-2026")
+PORT = int(os.environ.get("PORT", "8000"))
 
 agent = Agent(
     name=AGENT_NAME,
